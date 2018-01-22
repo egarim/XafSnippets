@@ -1,0 +1,66 @@
+            Dictionary<Type, Action<DevExpress.Xpo.Session>> CustomQueries = new Dictionary<Type, Action<DevExpress.Xpo.Session>>();
+            Action<DevExpress.Xpo.Session> MSSqlServerQueries =
+            (DevExpress.Xpo.Session XpoSession) =>
+            {
+                            //TODO use the session to alter the database by adding views, triggers etc
+                            //XpoSession.ExecuteNonQuery("create view ....");
+                            var text = "esto es MSSqlServerQueries";
+            };
+            Action<DevExpress.Xpo.Session> PostgressQueries =
+           (DevExpress.Xpo.Session XpoSession) =>
+           {
+                           //TODO use the session to alter the database by adding views, triggers etc
+                           //XpoSession.ExecuteNonQuery("Create view ...");
+                           //XpoSession.ExecuteNonQuery("Create view ...");
+                           //XpoSession.ExecuteNonQuery("Create view ...");
+                           //XpoSession.ExecuteNonQuery("Create view ...");
+                           var text = "esto es Postgres";
+           };
+            Action<DevExpress.Xpo.Session> AccessQueries =
+           (DevExpress.Xpo.Session XpoSession) =>
+           {
+                           //TODO use the session to alter the database by adding views, triggers etc
+                           //XpoSession.ExecuteNonQuery("Create view ...");
+                           //XpoSession.ExecuteNonQuery("Create view ...");
+                           //XpoSession.ExecuteNonQuery("Create view ...");
+                           //XpoSession.ExecuteNonQuery("Create view ...");
+                           var text = "esto es access";
+
+           };
+            Action<DevExpress.Xpo.Session> OracleQueries =
+          (DevExpress.Xpo.Session XpoSession) =>
+          {
+               //TODO use the session to alter the database by adding views, triggers etc
+               //XpoSession.ExecuteNonQuery("Create view ...");
+               //XpoSession.ExecuteNonQuery("Create view ...");
+               //XpoSession.ExecuteNonQuery("Create view ...");
+               //XpoSession.ExecuteNonQuery("Create view ...");
+               var text = "esto es access";
+
+          };
+
+            CustomQueries.Add(typeof(DevExpress.Xpo.DB.MSSqlConnectionProvider), MSSqlServerQueries);
+            CustomQueries.Add(typeof(DevExpress.Xpo.DB.PostgreSqlConnectionProvider), PostgressQueries);
+            CustomQueries.Add(typeof(DevExpress.Xpo.DB.AccessConnectionProvider), AccessQueries);
+            CustomQueries.Add(typeof(DevExpress.Xpo.DB.OracleConnectionProvider), OracleQueries);
+
+            var Os = (XPObjectSpace)this.ObjectSpace;
+            var DataLayer = Os.Session.DataLayer as DevExpress.Xpo.SimpleDataLayer;
+         
+            var IsDbStrStorePool = (DataLayer.ConnectionProvider as DevExpress.Xpo.DB.DataStorePool);
+            Type ProviderType = null;
+            if (IsDbStrStorePool != null)
+            {
+                ProviderType = IsDbStrStorePool.AcquireReadProvider().GetType();
+            }
+            else
+            {
+                ProviderType = DataLayer.ConnectionProvider.GetType();
+            }
+            foreach (var type in CustomQueries)
+            {
+                if (ProviderType == type.Key)
+                {
+                    type.Value.Invoke(Os.Session);
+                }
+            }
